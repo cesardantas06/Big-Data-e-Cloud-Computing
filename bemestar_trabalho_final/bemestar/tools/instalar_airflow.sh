@@ -15,7 +15,7 @@ if ! python3 -m venv /tmp/_teste_venv >/dev/null 2>&1; then
     sudo apt-get install -y -qq python3-venv
 fi
 rm -rf /tmp/_teste_venv
-[ -x "$VENV/bin/python" ] || python3 -m venv "$VENV"
+[ -x "$VENV/bin/python" ] || "${PYTHON_BIN:-python3}" -m venv "$VENV"
 source "$VENV/bin/activate"
 PY="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 

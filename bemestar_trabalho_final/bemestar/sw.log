@@ -1,0 +1,43 @@
+nohup: ignoring input
+
+  Starting SeaweedFS Mini ...
+  Master       starting
+  Master       ready     0.2s
+  Volume       starting
+  Volume       ready     0.2s
+  Filer        starting
+W1112 22:37:16.178712 filer.go:526 IAM gRPC service on filer is UNAUTHENTICATED: anyone who can reach this port can create users and policies, and its OIDC provider and role RPCs are refused; set jwt.filer_signing.key in security.toml to require an admin Bearer token
+  Filer        ready     3.2s
+  S3           starting
+  WebDAV       starting
+  S3           ready     0.2s
+  Iceberg      starting
+  Iceberg      ready     0.0s
+  Lance        starting
+  Lance        ready     0.0s
+  WebDAV       ready     0.2s
+W1112 22:37:16.479511 mini.go:1915 Admin authentication is disabled; binding the admin interface to 127.0.0.1 instead of 0.0.0.0. Set -admin.password, configure https.admin mTLS, or use -admin.allowInsecureBind to retain the insecure network bind.
+  Admin        starting
+  Admin        ready     0.5s
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                      SeaweedFS Mini - All-in-One Mode                         ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+  All enabled components are running and ready to use:
+
+    Master UI:       http://10.0.3.45:9333
+    Volume Server:   http://10.0.3.45:9340
+    Filer UI:        http://10.0.3.45:8888
+    WebDAV:          http://10.0.3.45:7333
+    S3 Endpoint:     http://10.0.3.45:8333
+    Iceberg Catalog: http://10.0.3.45:8181
+    Lance Namespace: http://10.0.3.45:9101
+    Admin UI:        http://127.0.0.1:12535
+
+  Data Directory:   data/seaweedfs
+  Free Space:       17.56 GiB
+  Volume Size:      512.00 MiB
+  Volume Count:     34
+  Free Volumes:     34
+
+  Press Ctrl+C to stop all components
