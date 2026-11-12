@@ -1,0 +1,99 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório final — Drogaria Bem-Estar</title>
+<style>
+@page{size:A4;margin:13mm 14mm}
+body{font:9.2pt/1.36 "DejaVu Sans","Liberation Sans",Arial,sans-serif;color:#1d2433;margin:0}
+h1{font-size:16pt;margin:0 0 2px}h2{font-size:11pt;margin:11px 0 4px;color:#0b5f73;border-bottom:1px solid #cfd8dc;padding-bottom:2px}
+h3{font-size:9.6pt;margin:7px 0 2px}p{margin:3px 0}ul{margin:3px 0 3px 15px;padding:0}li{margin:1px 0}
+.sub{color:#5a6678;font-size:8.6pt;margin-bottom:6px}
+table{border-collapse:collapse;width:100%;margin:4px 0;font-size:8.2pt}th,td{border:1px solid #cfd8dc;padding:2px 5px;vertical-align:top;text-align:left}
+th{background:#eaf3f5}td.n,th.n{text-align:right;white-space:nowrap}
+.flow{display:flex;align-items:stretch;gap:4px;margin:6px 0;font-size:8pt}
+.box{flex:1;border:1px solid #0b5f73;border-radius:4px;padding:3px 4px;text-align:center;background:#f3f9fa}
+.box b{display:block;color:#0b5f73}.arrow{align-self:center;color:#0b5f73;font-weight:bold}
+.src{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:4px 0;font-size:7.8pt}.src div{border:1px dashed #7a8aa0;border-radius:4px;padding:2px 4px;text-align:center}
+.warn{background:#fff6e0;border-left:3px solid #e0a100;padding:3px 7px;margin:5px 0;font-size:8.6pt}
+code{font:8pt "DejaVu Sans Mono",monospace;background:#f1f4f6;padding:0 2px}
+.pb{page-break-before:always}.small{font-size:7.8pt;color:#5a6678}
+</style></head><body>
+<h1>Drogaria Bem-Estar — Plataforma de Dados</h1>
+<div class="sub">Trabalho Final · Cenário 3 (rede de farmácias) · Luis Cesar Dantas Caricchio Costa, IBMEC Botafogo · 08/11/2026 · Dados reais até 30/09/2026; lote de 01–14/10/2026 <b>simulado</b> (ver §6)</div>
+
+<h2>1. Problema, produto e arquitetura</h2>
+<p>A rede de 20 lojas perde venda por <b>ruptura</b> e dinheiro por <b>produto vencido</b>, e compra de distribuidores que prometem prazos que não cumprem. O produto de dados é o <b>relatório diário de reposição</b> (HTML + CSV, publicado no Lake): o que repor com o prazo <i>real</i> de cada distribuidor, o que transferir entre lojas da mesma cidade, os lotes que vencem antes de vender, a pontualidade dos distribuidores e a perda por vencimento. Responde às 5 perguntas da diretoria com SQL só sobre a Gold (<code>sql/perguntas_negocio.sql</code>).</p>
+<div class="src"><div><b>SQLite</b><br>vendas 36.357 · itens 50.350 · clientes 4.163 · produtos 73 · lojas 20</div><div><b>CSV semanal</b><br>inventário loja×lote, 18 semanas, 34.895 linhas</div><div><b>JSON</b><br>fornecedores (9 registros, 8 ids)</div><div><b>JSONL</b><br>eventos PDV, 122 dias, 61.212</div><div><b>API</b><br>pedidos de reposição, 7.691 (<code>sequencia</code>)</div></div>
+<div class="flow"><div class="box"><b>5 ELs</b>incrementais<br>→ Landing</div><span class="arrow">→</span><div class="box"><b>Lake S3</b>SeaweedFS<br><code>bemestar-lake</code></div><span class="arrow">→</span><div class="box"><b>Bronze</b>Parquet, texto<br>+ linhagem</div><span class="arrow">→</span><div class="box"><b>Silver</b>regras, HMAC<br>quarentena</div><span class="arrow">→</span><div class="box"><b>Gate</b>% quarentena<br>exit 1 = para</div><span class="arrow">→</span><div class="box"><b>Gold</b>DuckDB<br>fatos + marts</div><span class="arrow">→</span><div class="box"><b>Produto</b>relatório<br>+ listas CSV</div></div>
+<p class="small">Airflow (<code>bemestar_pipeline</code>, 06:00, <code>max_active_runs=1</code>): sensores (<code>aguardar_api</code>; <code>aguardar_lake</code> espera se o Lake está fora, falha na hora com 403) → 5 ELs em paralelo → Landing no Lake → Bronze → Silver → gate (<code>max_quarentena_pct</code>=3) → Gold → validar → publicação (<code>--espelhar</code> nas camadas derivadas) + produto. Testado: execução completa verde, API derrubada (o sensor insiste), credencial errada (falha em 2 s), gate a 0,01% (para; o hash do <code>bemestar.duckdb</code> não mudou).</p>
+<p><b>Incrementalidade.</b> SQLite: marca d'água em <code>datetime(atualizado_em)</code> por tabela; itens seguem a venda-mãe. CSV/JSONL/JSON: SHA-256 de cada arquivo (nova versão do JSON é guardada, a mais recente vale). API: <code>after_sequence</code> guardado em estado, uma linha por versão de pedido. Cada EL tem seu arquivo de estado e grava de forma atômica. Silver mantém a <b>versão mais recente por chave</b>; Bronze guarda todas.</p>
+
+<h2>2. Qualidade: regras, quarentena e gate</h2>
+<p>Cada regra tem <b>tipo</b> (validade, completude, unicidade, integridade, consistência) e <b>ação</b>: <i>quarentena</i> (linha não confiável, vai com o motivo), <i>corrigir</i> (correção determinística e documentada) ou <i>alerta</i> (segue, mas é contada). Números do estado real (30/09), de <code>data/qualidade/relatorio_qualidade.json</code>:</p>
+<table><tr><th>Conjunto · regra</th><th>Tipo</th><th>Ação</th><th class="n">Linhas</th></tr>
+<tr><td>inventário · <code>linha_duplicada</code> (mesma loja×produto×lote×data)</td><td>unicidade</td><td>quarentena</td><td class="n">178</td></tr>
+<tr><td>inventário · <code>quantidade_negativa</code></td><td>validade</td><td>quarentena</td><td class="n">104</td></tr>
+<tr><td>inventário · <code>produto_inexistente</code> (id 9999) / <code>lote_incompativel_com_produto</code></td><td>integridade / consistência</td><td>quarentena</td><td class="n">66 / 66</td></tr>
+<tr><td>inventário · validade <code>MM/AAAA</code> trocada pela data exata do lote na API / último dia do mês</td><td>consistência</td><td>corrigir</td><td class="n">4.299 / 825</td></tr>
+<tr><td>inventário · <code>lote_vencido_na_contagem</code> (fato de negócio, base da perda)</td><td>consistência</td><td>alerta</td><td class="n">32</td></tr>
+<tr><td>eventos · <code>evento_duplicado</code> (reenvio do PDV, fica a 1ª) / <code>data_invalida</code> / <code>tipo_ausente</code> / <code>venda_inexistente</code></td><td>unicidade, validade, completude, integridade</td><td>quarentena</td><td class="n">519 / 97 / 84 / 57</td></tr>
+<tr><td>eventos · horário em UTC convertido para Brasília / evento em arquivo de outro dia</td><td>consistência</td><td>corrigir / alerta</td><td class="n">115 / 916</td></tr>
+<tr><td>pedidos · <code>entregue_antes_de_solicitado</code> / <code>quantidade_invalida</code> / <code>produto_inexistente</code> / <code>status_incoerente</code></td><td>consistência, validade, integridade</td><td>quarentena</td><td class="n">27 / 18 / 16 / 6</td></tr>
+<tr><td>pedidos · status <code>ENTREGUE</code>, <code>entregue </code>, <code>em transito</code> padronizados</td><td>consistência</td><td>corrigir</td><td class="n">13</td></tr>
+<tr><td>itens de venda · <code>produto_inexistente</code> / <code>lote_incompativel_com_produto</code> (mesmos 45 itens)</td><td>integridade / consistência</td><td>quarentena</td><td class="n">45 / 45</td></tr>
+<tr><td>itens de venda · <code>lote_ausente</code> (entra na venda, não baixa lote)</td><td>completude</td><td>alerta</td><td class="n">105</td></tr>
+<tr><td>vendas · <code>valor_total</code> negativo com itens positivos (|valor| = soma dos itens, conferido)</td><td>validade</td><td>corrigir</td><td class="n">67</td></tr>
+<tr><td>fornecedores · id repetido divergente / prazo "2 dias" / pedido mínimo negativo / CNPJ ausente</td><td>unicidade, consistência, validade, completude</td><td>quarentena / corrigir / corrigir / alerta</td><td class="n">1 / 1 / 1 / 1</td></tr>
+<tr><td>clientes · CPF só dígitos (aceito) / CPF inválido / e-mail inválido / telefone placeholder</td><td>consistência, validade</td><td>corrigir / alerta</td><td class="n">30 / 10 / 19 / 40</td></tr></table>
+<p><b>Gate.</b> Percentual de quarentena por conjunto no estado real: eventos 1,24% · inventário 0,99% · pedidos 0,87% · itens 0,09% · demais 0%; fornecedores 11,11% (1 de 9 linhas). <b>Limite padrão 3%</b> (parâmetro do DAG): os defeitos reais se concentram em ~1% e o limite dá ~2–3× de folga; um salto acima de 3% indica quebra da fonte (formato novo, id órfão em massa), não ruído. Conjuntos minúsculos usam <b>limite em linhas</b> (fornecedores e lojas: 2), pois 1 linha ruim de 9 seria 11%. O gate também confere que Silver+quarentena+versões substituídas = linhas da Bronze (contagem independente), então nada some sem explicação. Se bloqueia, sai com código 1 e a Gold anterior permanece.</p>
+
+<h2>3. Gold: grão de cada tabela</h2>
+<table><tr><th>Tabela</th><th>Grão (uma linha por…)</th><th class="n">Linhas</th><th>Por que esse grão</th></tr>
+<tr><td><code>fato_venda_item</code></td><td>item de venda (<code>item_id</code>)</td><td class="n">50.305</td><td>menor grão com loja, produto, lote e data: dá taxa de venda por loja×produto e baixa por lote (FEFO)</td></tr>
+<tr><td><code>fato_estoque_lote</code></td><td>loja × produto × lote × data de contagem</td><td class="n">34.549</td><td>a contagem semanal é a âncora do estoque; o lote carrega a validade</td></tr>
+<tr><td><code>fato_reposicao</code></td><td>pedido (versão vigente)</td><td class="n">7.624</td><td>mede prazo prometido × real, atraso e pedidos em trânsito</td></tr>
+<tr><td><code>fato_devolucao</code></td><td>evento de devolução</td><td class="n">170</td><td>ajusta o estoque; o evento é o fato</td></tr>
+<tr><td>dim_loja · dim_produto · dim_fornecedor · dim_data</td><td>chave de negócio (data: 425 dias)</td><td class="n">20 · 73 · 8</td><td>chaves substitutas; <code>nome</code> só aqui</td></tr>
+<tr><td><code>mart_estoque_loja_produto</code></td><td>loja × produto</td><td class="n">1.377</td><td>dias de estoque, situação e quantidade sugerida (P1)</td></tr>
+<tr><td><code>mart_estoque_lote</code> / <code>mart_risco_vencimento</code></td><td>loja × produto × lote</td><td class="n">2.166</td><td>estoque estimado por lote; sobra prevista na validade em fila FEFO (P2)</td></tr>
+<tr><td><code>mart_perda_vencimento</code></td><td>loja × produto × lote vencido</td><td class="n">40</td><td>unidades e valor perdidos (P4); excludente com risco</td></tr>
+<tr><td><code>mart_pontualidade_fornecedor</code> · <code>mart_transferencia</code></td><td>fornecedor · produto × origem × destino</td><td class="n">8 · 27</td><td>P3 e P5</td></tr>
+<tr><td><code>mart_receita_retida</code></td><td>loja × categoria × mês (k ≥ 5)</td><td class="n">160</td><td>agregado, por LGPD</td></tr></table>
+<p><b>Estoque de hoje.</b> Não existe contagem diária: estoque = última contagem do lote − vendas do lote desde então + entregas. Em 97% das semanas por lote a conta fecha exatamente; o ruído restante (~3%: quebra, furto, erro de contagem) é a incerteza declarada. <code>validar.py</code> roda 47 verificações (grão único, chaves sem órfãs, reconciliação com a Silver, invariantes, LGPD): 47/47. Ela já pegou falhas reais: R$ 2.644,02 de diferença que eram os itens em quarentena (a conciliação passou a ser <i>Gold + quarentena = total da venda</i>) e um lote contado em perda e em risco ao mesmo tempo.</p>
+
+<h2>4. LGPD: decisões do cenário</h2>
+<ul><li><b>A reposição não precisa de pessoa.</b> A ligação cliente↔medicamento é cortada na <b>Silver</b>: <code>vendas</code> perde <code>cliente_id</code> (fica <code>cliente_identificado</code>) e a Gold nem lê <code>clientes</code>. Nenhuma tabela da Gold permite descobrir o medicamento de uma pessoa identificável (verificado em <code>validar.py</code> por nome de coluna).</li>
+<li><b>Pseudonimização:</b> <code>cliente_id</code> e CPF viram HMAC-SHA256 com chave em <code>PSEUDO_CHAVE</code> / Variable <code>pseudo_secret</code> (nunca no código). SHA-256 puro seria revertido por lista de CPFs; HMAC sem a chave não.</li>
+<li><b>Descartados na Silver:</b> nome, e-mail, telefone, nascimento, <code>operador_id</code> (funcionário) e <code>contato_email</code> do distribuidor. CNPJ (pessoa jurídica) fica na Silver, fora da Gold.</li>
+<li><b><code>receita_retida</code> (9.769 eventos) é dado de saúde:</b> só existe como <code>mart_receita_retida</code>, por loja × categoria × mês, com supressão de células com menos de 5 eventos (medido: 160 células, 0 abaixo de k).</li>
+<li><b>Zonas restritas:</b> Landing e Bronze guardam o bruto (com CPF e nome) para auditoria. A quarentena é publicada com as colunas pessoais <b>mascaradas</b> na entrada. No laboratório há uma só credencial; em produção seriam prefixos com IAM, consumidores lendo só <code>warehouse/</code> e <code>relatorios/</code>.</li></ul>
+
+<h2>5. Produto de dados: evidência de que funciona</h2>
+<p><b>Regra.</b> Repor quando <code>(estoque vendável + em trânsito) / taxa 28 d &lt; p90 do prazo real do distribuidor + 1 dia</code>; quantidade = taxa × (p90 + 14) − estoque − em trânsito, com o pedido mínimo do distribuidor indicado ao lado de cada sugestão. Só conta estoque de lotes não vencidos. Transferência só dentro da mesma cidade, de lojas em excesso (mais de 60 dias de cobertura), sem deixar o doador abaixo de 45 dias.</p>
+<h3>5.1 Margem de prazo: prazo real × prometido (estado de 30/09)</h3>
+<p>Só 72,3% dos 7.421 pedidos entregues chegaram no prazo. Nova Saúde Atacadista (34,9% no prazo, p90 = 9 dias) e Profarma Leste (35,6%, p90 = 9) prometem 2 dias; Santa Cruz promete 7 e tem p90 de 8; os outros cinco ficam entre 79,8% e 83,8%. <b>Regra ingênua</b> (cobertura menor que o prazo cadastrado): 16 combinações. <b>Regra do produto</b>: 37 (12 rupturas e 25 a repor), incluindo as 16. <b>21 casos (57%) só aparecem com o prazo real</b>; 14 dos 37 são desses dois distribuidores. Sugestão: 129 unidades, R$ 5.800,71 a preço de venda (o custo não existe nas fontes).</p>
+<h3>5.2 Respostas à diretoria (30/09, dados reais)</h3>
+<table><tr><th>Pergunta</th><th>Resultado</th></tr>
+<tr><td>P1 dias de estoque</td><td>1.377 combinações loja×produto: 1.129 ok, 175 excesso (mediana 98 dias), 36 sem giro, 25 repor (mediana 4,7 dias), 12 ruptura</td></tr>
+<tr><td>P2 lotes que vencem antes de vender</td><td>60 lotes, 939 unidades, R$ 46.601,71 em risco em 90 dias; 31 lotes (R$ 30.371,04) vencem em até 30 dias</td></tr>
+<tr><td>P3 distribuidores fora do prazo</td><td>Nova Saúde e Profarma Leste (ver 5.1); atraso médio dos atrasados de 4,8 dias nesses dois</td></tr>
+<tr><td>P4 perda por vencimento</td><td>40 lotes, 437 unidades, <b>R$ 23.936,63</b> (jul–set; 41% uso contínuo, 33% dermocosmético). Valor a preço de venda, só lotes vistos nas contagens: é piso, não total</td></tr>
+<tr><td>P5 sobra × falta</td><td>27 transferências possíveis, 130 unidades, todas na mesma cidade</td></tr></table>
+<h3>5.3 Antes × depois do lote (<b>simulado</b>)</h3>
+<p>Listas de 30/09 contra o que aconteceu em 01–14/10 (<code>sql/avaliacao_produto.sql</code>): (a) das 41 combinações apontadas, <b>61,0%</b> (25) estavam sem nenhuma unidade vendável na contagem de 12/10, contra 34,4% (449 de 1.305) das não apontadas; (b) dos 7 lotes apontados que venceriam entre 06 e 14/10, 6 (85,7%) ainda tinham unidades na última contagem antes de vencer; (c) as 9 perdas por vencimento de outubro (todas) já estavam na lista de risco. <span class="small">Limite: o lote foi gerado por mim e as vendas não dependem das recomendações; o teste mostra que a lista aponta para onde o estoque realmente acaba, não que o produto reduza perdas. Com 7 lotes a amostra de (b) é pequena.</span></p>
+
+<h2>6. Lote incremental: o que foi provado</h2>
+<div class="warn">O <code>lote_incremental/</code> do professor não veio no material. <code>tools/simular_lote.py</code> aplica um lote equivalente (semente fixa, idempotente): 30 clientes alterados + 40 novos, 12 reajustes de preço + 3 produtos novos, 3.394 vendas novas (e 5 cancelamentos de vendas antigas), 150 pedidos em trânsito → entregue, 763 pedidos novos, contagens de 05/10 e 12/10 e nova versão de <code>fornecedores.json</code>. Todo número de outubro é <b>simulado</b>.</div>
+<table><tr><th>Camada</th><th class="n">Antes</th><th class="n">Depois</th><th>Leitura</th></tr>
+<tr><td>Bronze · vendas / itens / produtos</td><td class="n">36.357 / 50.350 / 73</td><td class="n">39.756 / 55.581 / 88</td><td>Bronze acumula versões (produtos 88 = 73 + 15 alterados/novos)</td></tr>
+<tr><td>Silver · produtos / pedidos (1 por pedido)</td><td class="n">73 / 7.624</td><td class="n">76 / 8.388</td><td>Silver tem uma linha por chave: reajuste substitui, não duplica</td></tr>
+<tr><td>Gold · fato_venda_item / dim_produto</td><td class="n">50.305 / 73</td><td class="n">55.524 / 76</td><td>grão único (validar 47/47)</td></tr>
+<tr><td>Pedidos em trânsito / entregues</td><td class="n">203 / 7.421</td><td class="n">434 / 7.954</td><td>150 atualizados para entregue</td></tr></table>
+<p>Os ELs capturaram só o novo: SQLite 15 produtos, 70 clientes, 3.399 vendas, 5.233 itens; 40 CSVs; 14 JSONL; 1 nova versão do JSON; API 913 registros (sequência 7.691 → 8.604). <b>Segunda execução sem dado novo: 0 capturas, 549 arquivos pulados, 0 linhas novas na Bronze e <code>contagens.sql</code> idêntico</b> (<code>diff</code> vazio).</p>
+
+<h2>7. Dificuldades: problema, causa, solução</h2>
+<ul><li><b>Silver quebrou com <code>invalid escape sequence \1</code>.</b> O DuckDB usa RE2, sem retrovisor; a regra de telefone-placeholder (21999999999) usava <code>(\d)\1+</code>. Troquei por comparação com <code>replace()</code> do primeiro dígito.</li>
+<li><b>A conciliação da Gold acusou R$ 2.644,02 de diferença.</b> Eram os itens em quarentena (produto 9999), que ainda compõem o total da venda. A regra virou Gold + quarentena = total.</li>
+<li><b>Lote vencendo "hoje" contado duas vezes</b> (em perda e em risco). Perda passou a ser <code>validade &lt; data_ref</code>; e, após o lote, o <code>validar</code> pegou lote já vencido aparecendo em risco: risco agora só considera lotes não vencidos, e eles saem da fila FEFO.</li>
+<li><b>O gate funcionou contra mim:</b> a 1ª versão do simulador gerou códigos de lote fora do padrão <code>Lppp-nnnn</code> e fornecedor errado em produtos novos, o que mandou 9,81% dos pedidos para a quarentena e o gate bloqueou a Gold. Corrigi o simulador, não a regra.</li>
+<li><b>Linha de base contaminada:</b> ao reconstruir o "antes" a API ainda servia o lote; só comparei as contagens depois de subir uma API sobre as fontes originais (contagens idênticas às de antes do lote).</li>
+<li><b>Sem custo de compra e sem contagem diária.</b> Valores a preço de venda; estoque estimado com ruído de ~3%. Ambos declarados no produto.</li></ul>
+<p class="small">Fontes dos números: <code>data/qualidade/relatorio_qualidade.json</code> e <code>gate.json</code> (cópias do estado real em <code>docs/*_30set.*</code>), <code>docs/contagens_antes|depois_do_lote.txt</code>, <code>docs/respostas_diretoria_30set.txt</code>, <code>docs/avaliacao_produto.txt</code>, <code>data/qualidade/validacao_gold.json</code>.</p>
+</body></html>

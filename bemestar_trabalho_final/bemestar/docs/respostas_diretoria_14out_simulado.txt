@@ -1,0 +1,144 @@
+
+┌─────────────────────┬───────────────────┬─────────┬─────────────┬────────────┬──────────────┬─────────────┬──────────┐
+│        loja         │      produto      │ estoque │ em_transito │ vendas_dia │ dias_estoque │ limite_dias │ situacao │
+│       varchar       │      varchar      │ int128  │   int128    │   double   │    double    │    int32    │ varchar  │
+├─────────────────────┼───────────────────┼─────────┼─────────────┼────────────┼──────────────┼─────────────┼──────────┤
+│ Bem-Estar Alcântara │ Omeprazol 20mg    │       0 │           0 │      0.714 │          0.0 │          10 │ ruptura  │
+│ Bem-Estar Alcântara │ Amoxicilina 500mg │       0 │           0 │      0.143 │          0.0 │           5 │ ruptura  │
+│ Bem-Estar Alcântara │ Escova Dental     │       0 │           0 │      0.643 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Torsilax          │       0 │           0 │      0.214 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Dipirona Gotas    │       0 │           0 │      0.429 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Sinvastatina 20mg │       0 │           0 │      0.893 │          0.0 │          10 │ ruptura  │
+│ Bem-Estar Alcântara │ Fralda Infantil G │       0 │           0 │      0.179 │          0.0 │           5 │ ruptura  │
+│ Bem-Estar Alcântara │ Cefalexina 500mg  │       0 │           0 │      0.286 │          0.0 │           6 │ ruptura  │
+│ Bem-Estar Alcântara │ Água Micelar      │       0 │           0 │        0.5 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Insulina NPH      │       0 │           0 │      0.536 │          0.0 │           6 │ ruptura  │
+│ Bem-Estar Alcântara │ Magnésio          │       0 │           0 │      0.214 │          0.0 │           9 │ ruptura  │
+│ Bem-Estar Alcântara │ Sabonete Líquido  │       0 │           0 │      0.143 │          0.0 │          10 │ ruptura  │
+│ Bem-Estar Alcântara │ Absorvente        │       0 │           0 │      0.071 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Atenolol 25mg     │       0 │           0 │      1.357 │          0.0 │           4 │ ruptura  │
+│ Bem-Estar Alcântara │ Enalapril 10mg    │       0 │           0 │      0.714 │          0.0 │           4 │ ruptura  │
+└─────────────────────┴───────────────────┴─────────┴─────────────┴────────────┴──────────────┴─────────────┴──────────┘
+  15 rows                                                                                                    8 columns
+
+
+┌──────────┬─────────────┬────────────────────────┐
+│ situacao │ combinacoes │ cobertura_mediana_dias │
+│ varchar  │    int64    │         double         │
+├──────────┼─────────────┼────────────────────────┤
+│ ok       │         717 │                   14.0 │
+│ ruptura  │         404 │                    0.0 │
+│ excesso  │         139 │                   94.5 │
+│ repor    │          84 │                    3.9 │
+│ sem_giro │          45 │                   NULL │
+└──────────┴─────────────┴────────────────────────┘
+
+
+┌────────────────────────┬──────────────────────┬─────────────┬────────────┬───────┬──────────────┬────────────┬───────┬────────────────┐
+│          loja          │       produto        │ lote_codigo │  validade  │ dias  │ estoque_lote │ vendas_dia │ sobra │ reais_em_risco │
+│        varchar         │       varchar        │   varchar   │    date    │ int64 │    int128    │   double   │ int32 │     double     │
+├────────────────────────┼──────────────────────┼─────────────┼────────────┼───────┼──────────────┼────────────┼───────┼────────────────┤
+│ Bem-Estar Leblon       │ Escitalopram 10mg    │ L014-0112   │ 2026-10-15 │     1 │            5 │      0.464 │     5 │         215.45 │
+│ Bem-Estar Penha        │ Colágeno             │ L070-0097   │ 2026-10-17 │     3 │           18 │      0.786 │    16 │         795.04 │
+│ Bem-Estar Itaipu       │ Fralda Infantil G    │ L048-0100   │ 2026-10-20 │     6 │           12 │      0.214 │    11 │         330.99 │
+│ Bem-Estar Leblon       │ Rosuvastatina 10mg   │ L012-0127   │ 2026-10-21 │     7 │            8 │      0.536 │     5 │         274.45 │
+│ Bem-Estar Campo Grande │ Vitamina D 2000UI    │ L064-0104   │ 2026-10-22 │     8 │           34 │      0.643 │    29 │         620.31 │
+│ Bem-Estar Méier        │ Claritromicina 500mg │ L026-0129   │ 2026-10-23 │     9 │           39 │      0.964 │    31 │        1624.09 │
+│ Bem-Estar Centro       │ Amoxicilina 500mg    │ L021-0058   │ 2026-10-23 │     9 │            5 │      0.143 │     4 │         155.56 │
+│ Bem-Estar Méier        │ Insulina NPH         │ L008-0110   │ 2026-10-24 │    10 │            6 │      0.536 │     1 │          53.59 │
+│ Bem-Estar Itaipu       │ Escova Dental        │ L040-0104   │ 2026-10-25 │    11 │           37 │        0.5 │    32 │         972.48 │
+│ Bem-Estar Penha        │ Paracetamol 750mg    │ L030-0107   │ 2026-10-25 │    11 │           19 │      0.321 │    16 │         197.44 │
+│ Bem-Estar Recreio      │ Água Micelar         │ L057-0111   │ 2026-10-26 │    12 │           33 │        0.5 │    27 │        3517.83 │
+│ Bem-Estar Icaraí       │ Repelente            │ L062-0070   │ 2026-10-26 │    12 │           10 │        0.0 │    10 │         1152.9 │
+│ Bem-Estar Recreio      │ Ferro Quelato        │ L071-0111   │ 2026-10-27 │    13 │           82 │      2.107 │    55 │        4140.95 │
+│ Bem-Estar Recreio      │ Claritromicina 500mg │ L026-0130   │ 2026-10-28 │    14 │           43 │      0.679 │    34 │        1781.26 │
+│ Bem-Estar Copacabana   │ Insulina NPH         │ L008-0130   │ 2026-11-01 │    18 │            6 │      0.321 │     1 │          53.59 │
+│ Bem-Estar Centro       │ Azitromicina 500mg   │ L022-0102   │ 2026-11-04 │    21 │           21 │      0.929 │     2 │          79.38 │
+│ Bem-Estar Itaipu       │ Rosuvastatina 10mg   │ L012-0128   │ 2026-11-05 │    22 │           36 │      0.429 │    27 │        1482.03 │
+│ Bem-Estar Vila Isabel  │ Claritromicina 500mg │ L026-0109   │ 2026-11-06 │    23 │           15 │      0.607 │     2 │         104.78 │
+│ Bem-Estar Alcântara    │ Doxiciclina 100mg    │ L028-0129   │ 2026-11-06 │    23 │           43 │       1.75 │     3 │          94.47 │
+│ Bem-Estar Centro       │ Colágeno             │ L070-0116   │ 2026-11-10 │    27 │           23 │      0.214 │    18 │         894.42 │
+└────────────────────────┴──────────────────────┴─────────────┴────────────┴───────┴──────────────┴────────────┴───────┴────────────────┘
+  20 rows                                                                                                                     9 columns
+
+
+┌─────────────────────────┬─────────────────┬──────────┬──────────────┬────────────────────────────┬──────────────────┬────────────────┬─────────────┬───────────────────────┐
+│      distribuidor       │ prazo_combinado │ entregas │ pct_no_prazo │ atraso_medio_dos_atrasados │ prazo_real_medio │ prazo_real_p90 │ em_transito │ em_transito_atrasados │
+│         varchar         │      int32      │  int64   │    double    │           double           │      double      │     int32      │    int64    │         int64         │
+├─────────────────────────┼─────────────────┼──────────┼──────────────┼────────────────────────────┼──────────────────┼────────────────┼─────────────┼───────────────────────┤
+│ Nova Saúde Atacadista   │               2 │      588 │         34.5 │                       4.63 │             4.92 │              9 │          30 │                    19 │
+│ Profarma Leste          │               2 │      889 │         35.5 │                       4.64 │             4.91 │              9 │          46 │                    23 │
+│ MedSul Logística        │               2 │     1002 │         77.7 │                       1.15 │             2.01 │              3 │          31 │                    10 │
+│ Farma Rio Distribuição  │               3 │     1967 │         78.1 │                       1.14 │             2.02 │              3 │         115 │                    47 │
+│ Panvel Atacado          │               2 │      952 │         78.2 │                       1.06 │             1.96 │              3 │          38 │                    17 │
+│ Santa Cruz Fluminense   │               7 │      959 │         78.6 │                       1.67 │             6.78 │              8 │          66 │                    39 │
+│ Distribuidora Atlântica │               4 │     1097 │         79.0 │                       1.21 │             3.91 │              5 │          72 │                    36 │
+│ DPSP Distribuição       │               3 │      500 │         81.2 │                       1.16 │             2.89 │              4 │          36 │                    22 │
+└─────────────────────────┴─────────────────┴──────────┴──────────────┴────────────────────────────┴──────────────────┴────────────────┴─────────────┴───────────────────────┘
+
+
+┌───────┬──────────┬────────────────┬─────────────────────┬───────────────────┐
+│ lotes │ unidades │ reais_perdidos │ primeiro_vencimento │ ultimo_vencimento │
+│ int64 │  int128  │     double     │        date         │       date        │
+├───────┼──────────┼────────────────┼─────────────────────┼───────────────────┤
+│    51 │      559 │       28090.76 │ 2026-07-17          │ 2026-10-13        │
+└───────┴──────────┴────────────────┴─────────────────────┴───────────────────┘
+
+
+┌─────────┬────────────────┬──────────┬─────────┐
+│   mes   │   categoria    │ unidades │  reais  │
+│ varchar │    varchar     │  int128  │ double  │
+├─────────┼────────────────┼──────────┼─────────┤
+│ 2026-07 │ dermocosmetico │       46 │ 5255.09 │
+│ 2026-07 │ uso_continuo   │       61 │ 4017.39 │
+│ 2026-07 │ higiene        │       22 │  450.78 │
+│ 2026-07 │ analgesico     │       29 │  417.31 │
+│ 2026-07 │ antibiotico    │       10 │   405.9 │
+│ 2026-07 │ vitaminas      │        6 │  380.34 │
+│ 2026-08 │ uso_continuo   │       97 │ 5833.83 │
+│ 2026-08 │ dermocosmetico │       21 │ 2721.09 │
+│ 2026-08 │ antibiotico    │       28 │ 1226.04 │
+│ 2026-08 │ analgesico     │       48 │  865.12 │
+│ 2026-08 │ higiene        │       28 │  825.92 │
+│ 2026-08 │ vitaminas      │        1 │   63.39 │
+│ 2026-09 │ uso_continuo   │       33 │ 1402.17 │
+│ 2026-09 │ vitaminas      │       25 │ 1123.95 │
+│ 2026-09 │ higiene        │       12 │  334.38 │
+│ 2026-09 │ dermocosmetico │        5 │  329.95 │
+│ 2026-09 │ antibiotico    │        3 │  116.67 │
+│ 2026-10 │ uso_continuo   │       30 │ 1154.38 │
+│ 2026-10 │ antibiotico    │        8 │  360.72 │
+│ 2026-10 │ analgesico     │       26 │  320.84 │
+│ 2026-10 │ vitaminas      │       11 │  250.69 │
+│ 2026-10 │ higiene        │        9 │  234.81 │
+└─────────┴────────────────┴──────────┴─────────┘
+  22 rows                             4 columns
+
+
+┌────────────────────────┬────────────────────────┬───────────────────────────┬────────────────┬────────────┬─────────────────────┬──────────────────────┐
+│        produto         │        de_loja         │         para_loja         │     cidade     │ quantidade │ dias_estoque_origem │ dias_estoque_destino │
+│        varchar         │        varchar         │          varchar          │    varchar     │   int32    │       double        │        double        │
+├────────────────────────┼────────────────────────┼───────────────────────────┼────────────────┼────────────┼─────────────────────┼──────────────────────┤
+│ Omeprazol 20mg         │ Bem-Estar Penha        │ Bem-Estar Recreio         │ Rio de Janeiro │         33 │               102.3 │                  0.0 │
+│ Omeprazol 20mg         │ Bem-Estar Penha        │ Bem-Estar Barra da Tijuca │ Rio de Janeiro │         20 │               102.3 │                  0.0 │
+│ Vitamina D 2000UI      │ Bem-Estar Campo Grande │ Bem-Estar Leblon          │ Rio de Janeiro │         16 │                76.2 │                  0.0 │
+│ Rosuvastatina 10mg     │ Bem-Estar Tijuca       │ Bem-Estar Madureira       │ Rio de Janeiro │         13 │               112.0 │                  0.0 │
+│ Nimesulida 100mg       │ Bem-Estar Copacabana   │ Bem-Estar Recreio         │ Rio de Janeiro │         11 │                76.4 │                  0.0 │
+│ Claritromicina 500mg   │ Bem-Estar Recreio      │ Bem-Estar Leblon          │ Rio de Janeiro │         10 │               113.5 │                  0.0 │
+│ Colágeno               │ Bem-Estar Centro       │ Bem-Estar Icaraí          │ Niterói        │         10 │               149.3 │                  0.0 │
+│ Escitalopram 10mg      │ Bem-Estar Itaipu       │ Bem-Estar Centro          │ Niterói        │         10 │                96.0 │                  0.0 │
+│ Anlodipino 5mg         │ Bem-Estar Bangu        │ Bem-Estar Penha           │ Rio de Janeiro │          9 │               100.8 │                  0.0 │
+│ Creme Dental           │ Bem-Estar Fonseca      │ Bem-Estar Centro          │ Niterói        │          9 │               224.0 │                  0.0 │
+│ Anlodipino 5mg         │ Bem-Estar Icaraí       │ Bem-Estar Fonseca         │ Niterói        │          8 │                59.5 │                  0.0 │
+│ Hidroclorotiazida 25mg │ Bem-Estar Penha        │ Bem-Estar Tijuca          │ Rio de Janeiro │          8 │                78.9 │                  0.0 │
+│ Água Micelar           │ Bem-Estar Recreio      │ Bem-Estar Leblon          │ Rio de Janeiro │          8 │               104.0 │                  0.0 │
+│ Água Micelar           │ Bem-Estar Recreio      │ Bem-Estar Campo Grande    │ Rio de Janeiro │          8 │               104.0 │                  0.0 │
+│ Água Micelar           │ Bem-Estar Recreio      │ Bem-Estar Ipanema         │ Rio de Janeiro │          8 │               104.0 │                  0.0 │
+│ Algodão                │ Bem-Estar Leblon       │ Bem-Estar Penha           │ Rio de Janeiro │          7 │               392.0 │                  0.0 │
+│ Anlodipino 5mg         │ Bem-Estar Copacabana   │ Bem-Estar Recreio         │ Rio de Janeiro │          7 │                65.3 │                  1.8 │
+│ Carvedilol 12,5mg      │ Bem-Estar Neves        │ Bem-Estar Centro          │ São Gonçalo    │          7 │                98.0 │                  0.0 │
+│ Carvedilol 12,5mg      │ Bem-Estar Vila Isabel  │ Bem-Estar Barra da Tijuca │ Rio de Janeiro │          7 │                79.3 │                  0.0 │
+│ Colágeno               │ Bem-Estar Penha        │ Bem-Estar Madureira       │ Rio de Janeiro │          7 │                54.7 │                  0.0 │
+└────────────────────────┴────────────────────────┴───────────────────────────┴────────────────┴────────────┴─────────────────────┴──────────────────────┘
+  20 rows                                                                                                                                      7 columns
+

@@ -1,0 +1,25 @@
+# Ambiente e caches
+.venv/
+__pycache__/
+*.pyc
+
+# Tudo o que o pipeline gera (pode ser recriado a qualquer momento)
+data/
+
+# Arquivos temporários de gravação atômica
+*.tmp
+
+# Executável do SeaweedFS (153 MB: grande demais para o Git)
+tools/seaweedfs/weed.exe
+
+# Lote incremental entregue pelo professor
+lote_incremental/
+
+# Segredos locais
+.env
+
+# Material exclusivo do professor (gabaritos, geradores e lotes incrementais).
+_PROFESSOR/
+
+# Binário do SeaweedFS em Linux/macOS
+tools/seaweedfs/weed

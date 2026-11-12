@@ -1,0 +1,75 @@
+{
+  "avaliado_em": "2026-11-08T07:21:07.433293+00:00",
+  "limite_quarentena_pct": 3.0,
+  "limites_em_linhas": {
+    "fornecedores": 2,
+    "lojas": 2
+  },
+  "decisao": "APROVADO",
+  "bloqueios": [],
+  "conjuntos": {
+    "lojas": {
+      "bronze": 20,
+      "silver": 20,
+      "quarentena": 0,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.0
+    },
+    "fornecedores": {
+      "bronze": 9,
+      "silver": 8,
+      "quarentena": 1,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 11.11
+    },
+    "produtos": {
+      "bronze": 73,
+      "silver": 73,
+      "quarentena": 0,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.0
+    },
+    "clientes": {
+      "bronze": 4163,
+      "silver": 4163,
+      "quarentena": 0,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.0
+    },
+    "vendas": {
+      "bronze": 36357,
+      "silver": 36357,
+      "quarentena": 0,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.0
+    },
+    "itens_venda": {
+      "bronze": 50350,
+      "silver": 50305,
+      "quarentena": 45,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.09
+    },
+    "inventario": {
+      "bronze": 34895,
+      "silver": 34549,
+      "quarentena": 346,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.99
+    },
+    "eventos": {
+      "bronze": 61212,
+      "silver": 60455,
+      "quarentena": 757,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 1.24
+    },
+    "pedidos_reposicao": {
+      "bronze": 7691,
+      "silver": 7624,
+      "quarentena": 67,
+      "versoes_substituidas": 0,
+      "pct_quarentena": 0.87
+    }
+  }
+}

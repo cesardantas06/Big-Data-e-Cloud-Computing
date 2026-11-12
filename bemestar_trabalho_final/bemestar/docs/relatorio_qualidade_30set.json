@@ -1,0 +1,837 @@
+{
+  "gerado_em": "2026-11-08T07:21:07.124388+00:00",
+  "conjuntos": {
+    "lojas": {
+      "fonte_bronze": "sqlite/lojas",
+      "bronze_linhas": 20,
+      "versoes_substituidas": 0,
+      "lidas": 20,
+      "aprovadas": 20,
+      "quarentena": 0,
+      "percentual_quarentena": 0.0,
+      "por_motivo": {},
+      "corrigidas_por_tipo": {},
+      "alertas": {},
+      "regras": [
+        {
+          "regra": "loja_duplicada",
+          "tipo": "unicidade",
+          "acao": "quarentena",
+          "descricao": "loja_id repetido na mesma captura",
+          "afetadas": 0
+        },
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "loja_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "nome_ausente",
+          "tipo": "completude",
+          "acao": "quarentena",
+          "descricao": "loja sem nome",
+          "afetadas": 0
+        },
+        {
+          "regra": "inauguracao_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "data de inauguração impossível",
+          "afetadas": 0
+        }
+      ]
+    },
+    "fornecedores": {
+      "fonte_bronze": "json",
+      "bronze_linhas": 9,
+      "versoes_substituidas": 0,
+      "lidas": 9,
+      "aprovadas": 8,
+      "quarentena": 1,
+      "percentual_quarentena": 11.11,
+      "por_motivo": {
+        "fornecedor_duplicado_divergente": 1
+      },
+      "corrigidas_por_tipo": {
+        "prazo_texto_convertido": 1,
+        "pedido_minimo_sinal_invertido": 1
+      },
+      "alertas": {
+        "cnpj_ausente": 1
+      },
+      "regras": [
+        {
+          "regra": "fornecedor_duplicado_divergente",
+          "tipo": "unicidade",
+          "acao": "quarentena",
+          "descricao": "mesmo fornecedor_id com dados diferentes; fica a versão cujo prazo concorda com o prazo combinado praticado na API, e a outra vai para a quarentena",
+          "afetadas": 1
+        },
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "fornecedor_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "nome_ausente",
+          "tipo": "completude",
+          "acao": "quarentena",
+          "descricao": "fornecedor sem nome",
+          "afetadas": 0
+        },
+        {
+          "regra": "prazo_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "prazo de entrega ausente ou fora de 1–60 dias",
+          "afetadas": 0
+        },
+        {
+          "regra": "pedido_minimo_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "pedido mínimo ausente ou não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "prazo_texto_convertido",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "prazo escrito como texto ('2 dias') convertido para número",
+          "afetadas": 1
+        },
+        {
+          "regra": "pedido_minimo_sinal_invertido",
+          "tipo": "validade",
+          "acao": "corrigir",
+          "descricao": "pedido mínimo negativo: sinal invertido, vira valor absoluto (hipótese documentada: todos os outros ficam entre 300 e 1000)",
+          "afetadas": 1
+        },
+        {
+          "regra": "cnpj_ausente",
+          "tipo": "completude",
+          "acao": "alerta",
+          "descricao": "fornecedor sem CNPJ (não usado na Gold)",
+          "afetadas": 1
+        },
+        {
+          "regra": "cnpj_formato_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "CNPJ fora do formato 00.000.000/0000-00",
+          "afetadas": 0
+        },
+        {
+          "regra": "prazo_diverge_da_api",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "prazo do cadastro diferente do prazo previsto nos pedidos da API",
+          "afetadas": 0
+        }
+      ]
+    },
+    "produtos": {
+      "fonte_bronze": "sqlite/produtos",
+      "bronze_linhas": 73,
+      "versoes_substituidas": 0,
+      "lidas": 73,
+      "aprovadas": 73,
+      "quarentena": 0,
+      "percentual_quarentena": 0.0,
+      "por_motivo": {},
+      "corrigidas_por_tipo": {},
+      "alertas": {},
+      "regras": [
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "produto_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "nome_ausente",
+          "tipo": "completude",
+          "acao": "quarentena",
+          "descricao": "produto sem nome",
+          "afetadas": 0
+        },
+        {
+          "regra": "preco_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "preço ausente, zero ou negativo",
+          "afetadas": 0
+        },
+        {
+          "regra": "categoria_fora_do_dominio",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "categoria fora das seis categorias do dicionário",
+          "afetadas": 0
+        },
+        {
+          "regra": "controlado_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "flag controlado diferente de 0/1",
+          "afetadas": 0
+        },
+        {
+          "regra": "fornecedor_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "fornecedor_id não existe em fornecedores (aprovados)",
+          "afetadas": 0
+        },
+        {
+          "regra": "atualizado_em_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "data de atualização inválida",
+          "afetadas": 0
+        },
+        {
+          "regra": "texto_padronizado",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "espaços e maiúsculas padronizados em nome/categoria",
+          "afetadas": 0
+        },
+        {
+          "regra": "ean_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "EAN fora de 13 dígitos",
+          "afetadas": 0
+        },
+        {
+          "regra": "ean_repetido",
+          "tipo": "unicidade",
+          "acao": "alerta",
+          "descricao": "mesmo EAN em mais de um produto",
+          "afetadas": 0
+        },
+        {
+          "regra": "principio_ativo_ausente",
+          "tipo": "completude",
+          "acao": "alerta",
+          "descricao": "medicamento sem princípio ativo",
+          "afetadas": 0
+        }
+      ]
+    },
+    "clientes": {
+      "fonte_bronze": "sqlite/clientes",
+      "bronze_linhas": 4163,
+      "versoes_substituidas": 0,
+      "lidas": 4163,
+      "aprovadas": 4163,
+      "quarentena": 0,
+      "percentual_quarentena": 0.0,
+      "por_motivo": {},
+      "corrigidas_por_tipo": {
+        "cpf_sem_mascara": 30
+      },
+      "alertas": {
+        "telefone_invalido": 40,
+        "email_invalido": 19,
+        "cpf_invalido": 10
+      },
+      "regras": [
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "cliente_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "criado_em_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "data de cadastro inválida",
+          "afetadas": 0
+        },
+        {
+          "regra": "atualizado_antes_de_criado",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "atualização anterior ao cadastro",
+          "afetadas": 0
+        },
+        {
+          "regra": "cpf_sem_mascara",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "CPF só com números e dígitos válidos: aceito (a Silver guarda só o HMAC dos 11 dígitos)",
+          "afetadas": 30
+        },
+        {
+          "regra": "cpf_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "CPF fora do formato, com dígito verificador errado ou repetido (111.111.111-11): o cadastro segue, sem CPF",
+          "afetadas": 10
+        },
+        {
+          "regra": "cpf_compartilhado",
+          "tipo": "unicidade",
+          "acao": "alerta",
+          "descricao": "mesmo CPF válido em mais de um cadastro",
+          "afetadas": 0
+        },
+        {
+          "regra": "email_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "e-mail vazio ou fora do formato",
+          "afetadas": 19
+        },
+        {
+          "regra": "telefone_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "telefone curto, zerado ou placeholder (21999999999)",
+          "afetadas": 40
+        },
+        {
+          "regra": "nascimento_implausivel",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "data de nascimento ausente, futura ou anterior a 1900",
+          "afetadas": 0
+        }
+      ]
+    },
+    "vendas": {
+      "fonte_bronze": "sqlite/vendas",
+      "bronze_linhas": 36357,
+      "versoes_substituidas": 0,
+      "lidas": 36357,
+      "aprovadas": 36357,
+      "quarentena": 0,
+      "percentual_quarentena": 0.0,
+      "por_motivo": {},
+      "corrigidas_por_tipo": {
+        "valor_total_sinal_invertido": 67
+      },
+      "alertas": {},
+      "regras": [
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "venda_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "loja_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "loja_id não existe em lojas",
+          "afetadas": 0
+        },
+        {
+          "regra": "data_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "data da venda inválida, futura ou fora da janela da base",
+          "afetadas": 0
+        },
+        {
+          "regra": "status_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "status fora de concluida/cancelada",
+          "afetadas": 0
+        },
+        {
+          "regra": "valor_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "valor total ausente ou zero",
+          "afetadas": 0
+        },
+        {
+          "regra": "atualizado_antes_da_venda",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "atualização anterior à venda",
+          "afetadas": 0
+        },
+        {
+          "regra": "valor_total_sinal_invertido",
+          "tipo": "validade",
+          "acao": "corrigir",
+          "descricao": "valor total negativo com itens positivos: sinal invertido, vira valor absoluto (conferido: em todos os casos |valor| = soma dos itens)",
+          "afetadas": 67
+        },
+        {
+          "regra": "cliente_inexistente",
+          "tipo": "integridade",
+          "acao": "alerta",
+          "descricao": "cliente_id não existe em clientes",
+          "afetadas": 0
+        },
+        {
+          "regra": "total_diverge_dos_itens",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "valor total diferente da soma dos itens (mesmo após corrigir o sinal)",
+          "afetadas": 0
+        },
+        {
+          "regra": "venda_sem_itens",
+          "tipo": "completude",
+          "acao": "alerta",
+          "descricao": "venda sem nenhum item",
+          "afetadas": 0
+        }
+      ]
+    },
+    "itens_venda": {
+      "fonte_bronze": "sqlite/itens_venda",
+      "bronze_linhas": 50350,
+      "versoes_substituidas": 0,
+      "lidas": 50350,
+      "aprovadas": 50305,
+      "quarentena": 45,
+      "percentual_quarentena": 0.09,
+      "por_motivo": {
+        "produto_inexistente": 45,
+        "lote_incompativel_com_produto": 45
+      },
+      "corrigidas_por_tipo": {},
+      "alertas": {
+        "lote_ausente": 105
+      },
+      "regras": [
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "item_id não numérico",
+          "afetadas": 0
+        },
+        {
+          "regra": "venda_inexistente_ou_reprovada",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "a venda do item não existe ou foi para a quarentena (efeito cascata intencional)",
+          "afetadas": 0
+        },
+        {
+          "regra": "produto_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "produto_id não existe em produtos (ex.: 9999)",
+          "afetadas": 45
+        },
+        {
+          "regra": "quantidade_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "quantidade ausente, zero ou negativa",
+          "afetadas": 0
+        },
+        {
+          "regra": "preco_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "preço unitário ausente, zero ou negativo",
+          "afetadas": 0
+        },
+        {
+          "regra": "lote_incompativel_com_produto",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "o código do lote (Lxxx-) pertence a outro produto",
+          "afetadas": 45
+        },
+        {
+          "regra": "lote_ausente",
+          "tipo": "completude",
+          "acao": "alerta",
+          "descricao": "item sem lote: entra nas vendas, mas não baixa nenhum lote do estoque",
+          "afetadas": 105
+        },
+        {
+          "regra": "lote_formato_invalido",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "lote fora do formato Lnnn-nnnn",
+          "afetadas": 0
+        }
+      ]
+    },
+    "inventario": {
+      "fonte_bronze": "csv",
+      "bronze_linhas": 34895,
+      "versoes_substituidas": 0,
+      "lidas": 34895,
+      "aprovadas": 34549,
+      "quarentena": 346,
+      "percentual_quarentena": 0.99,
+      "por_motivo": {
+        "linha_duplicada": 178,
+        "quantidade_negativa": 104,
+        "produto_inexistente": 66,
+        "lote_incompativel_com_produto": 66
+      },
+      "corrigidas_por_tipo": {
+        "validade_mes_ano_resolvida_pela_api": 4299,
+        "validade_mes_ano_ultimo_dia": 825
+      },
+      "alertas": {
+        "lote_vencido_na_contagem": 32,
+        "quantidade_atipica": 7
+      },
+      "regras": [
+        {
+          "regra": "linha_duplicada",
+          "tipo": "unicidade",
+          "acao": "quarentena",
+          "descricao": "mesma loja × produto × lote × data de contagem repetida no arquivo",
+          "afetadas": 178
+        },
+        {
+          "regra": "loja_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "loja_id não existe em lojas",
+          "afetadas": 0
+        },
+        {
+          "regra": "produto_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "produto_id não existe em produtos (ex.: 9999)",
+          "afetadas": 66
+        },
+        {
+          "regra": "quantidade_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "quantidade ausente ou não numérica",
+          "afetadas": 0
+        },
+        {
+          "regra": "quantidade_negativa",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "contagem negativa é impossível",
+          "afetadas": 104
+        },
+        {
+          "regra": "validade_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "validade ilegível ou fora de 2026–2035",
+          "afetadas": 0
+        },
+        {
+          "regra": "data_contagem_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "data da contagem inválida",
+          "afetadas": 0
+        },
+        {
+          "regra": "contagem_fora_da_pasta",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "data/loja da linha diferente da pasta/arquivo de onde veio",
+          "afetadas": 0
+        },
+        {
+          "regra": "lote_incompativel_com_produto",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "lote ausente/mal formado ou do código de outro produto",
+          "afetadas": 66
+        },
+        {
+          "regra": "validade_mes_ano_resolvida_pela_api",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "validade MM/AAAA trocada pela data exata que a API informou para o mesmo lote",
+          "afetadas": 4299
+        },
+        {
+          "regra": "validade_mes_ano_ultimo_dia",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "validade MM/AAAA sem outra fonte: assume o último dia do mês",
+          "afetadas": 825
+        },
+        {
+          "regra": "quantidade_atipica",
+          "tipo": "validade",
+          "acao": "alerta",
+          "descricao": "contagem de 100 ou mais unidades de um lote (confira)",
+          "afetadas": 7
+        },
+        {
+          "regra": "contagem_fora_da_segunda",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "contagem que não caiu numa segunda-feira",
+          "afetadas": 0
+        },
+        {
+          "regra": "lote_vencido_na_contagem",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "lote já vencido na hora da contagem (fato de negócio: base da perda por vencimento)",
+          "afetadas": 32
+        }
+      ]
+    },
+    "eventos": {
+      "fonte_bronze": "events",
+      "bronze_linhas": 61212,
+      "versoes_substituidas": 0,
+      "lidas": 61212,
+      "aprovadas": 60455,
+      "quarentena": 757,
+      "percentual_quarentena": 1.24,
+      "por_motivo": {
+        "evento_duplicado": 519,
+        "data_invalida": 97,
+        "tipo_ausente": 84,
+        "venda_inexistente": 57
+      },
+      "corrigidas_por_tipo": {
+        "fuso_utc_convertido": 115
+      },
+      "alertas": {
+        "evento_atrasado": 916
+      },
+      "regras": [
+        {
+          "regra": "evento_duplicado",
+          "tipo": "unicidade",
+          "acao": "quarentena",
+          "descricao": "evento_id repetido (reenvio do PDV); fica a primeira ocorrência",
+          "afetadas": 519
+        },
+        {
+          "regra": "tipo_ausente",
+          "tipo": "completude",
+          "acao": "quarentena",
+          "descricao": "evento sem tipo",
+          "afetadas": 84
+        },
+        {
+          "regra": "tipo_fora_do_dominio",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "tipo fora de venda/receita_retida/devolucao/cancelamento",
+          "afetadas": 0
+        },
+        {
+          "regra": "data_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "ocorrido_em vazio, ilegível ('2026-13-45...'), futuro ou fora da janela",
+          "afetadas": 97
+        },
+        {
+          "regra": "venda_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "venda_id não existe em vendas (aprovadas)",
+          "afetadas": 57
+        },
+        {
+          "regra": "loja_diverge_da_venda",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "a loja do evento é diferente da loja da venda",
+          "afetadas": 0
+        },
+        {
+          "regra": "produto_ausente",
+          "tipo": "completude",
+          "acao": "quarentena",
+          "descricao": "evento de item sem produto_id (só o cancelamento da venda inteira pode vir sem)",
+          "afetadas": 0
+        },
+        {
+          "regra": "produto_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "produto_id não existe em produtos",
+          "afetadas": 0
+        },
+        {
+          "regra": "quantidade_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "quantidade ausente, zero ou negativa num evento de item",
+          "afetadas": 0
+        },
+        {
+          "regra": "fuso_utc_convertido",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "horário em UTC ('Z') convertido para o mesmo instante em Brasília",
+          "afetadas": 115
+        },
+        {
+          "regra": "fuso_ausente_assumido_brasilia",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "horário sem fuso: assume Brasília",
+          "afetadas": 0
+        },
+        {
+          "regra": "tipo_padronizado",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "tipo com espaços/maiúsculas padronizado",
+          "afetadas": 0
+        },
+        {
+          "regra": "evento_atrasado",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "evento chegou em arquivo de outro dia (a data vale pela hora do evento, não pelo arquivo)",
+          "afetadas": 916
+        }
+      ]
+    },
+    "pedidos_reposicao": {
+      "fonte_bronze": "api/pedidos-reposicao",
+      "bronze_linhas": 7691,
+      "versoes_substituidas": 0,
+      "lidas": 7691,
+      "aprovadas": 7624,
+      "quarentena": 67,
+      "percentual_quarentena": 0.87,
+      "por_motivo": {
+        "entregue_antes_de_solicitado": 27,
+        "quantidade_invalida": 18,
+        "produto_inexistente": 16,
+        "lote_incompativel_com_produto": 16,
+        "status_incoerente_com_entrega": 6
+      },
+      "corrigidas_por_tipo": {
+        "status_padronizado": 13
+      },
+      "alertas": {},
+      "regras": [
+        {
+          "regra": "id_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "pedido_reposicao_id fora do formato REP-nnnnnn",
+          "afetadas": 0
+        },
+        {
+          "regra": "sequencia_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "sequência não numérica",
+          "afetadas": 0
+        },
+        {
+          "regra": "status_invalido",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "status fora de em_transito/entregue (após padronizar)",
+          "afetadas": 0
+        },
+        {
+          "regra": "quantidade_invalida",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "quantidade pedida ausente, zero ou negativa",
+          "afetadas": 18
+        },
+        {
+          "regra": "produto_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "produto_id não existe em produtos (ex.: 9999)",
+          "afetadas": 16
+        },
+        {
+          "regra": "loja_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "loja_id não existe em lojas",
+          "afetadas": 0
+        },
+        {
+          "regra": "fornecedor_inexistente",
+          "tipo": "integridade",
+          "acao": "quarentena",
+          "descricao": "fornecedor_id não existe em fornecedores (aprovados)",
+          "afetadas": 0
+        },
+        {
+          "regra": "fornecedor_diverge_do_produto",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "o distribuidor do pedido não é o do cadastro do produto",
+          "afetadas": 0
+        },
+        {
+          "regra": "lote_incompativel_com_produto",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "lote ausente/mal formado ou do código de outro produto",
+          "afetadas": 16
+        },
+        {
+          "regra": "datas_invalidas",
+          "tipo": "validade",
+          "acao": "quarentena",
+          "descricao": "solicitado_em, previsto_para, validade_lote ou entregue_em ilegíveis",
+          "afetadas": 0
+        },
+        {
+          "regra": "entregue_antes_de_solicitado",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "entrega anterior ao pedido (data impossível)",
+          "afetadas": 27
+        },
+        {
+          "regra": "previsto_antes_de_solicitado",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "previsão de entrega anterior ao pedido",
+          "afetadas": 0
+        },
+        {
+          "regra": "status_incoerente_com_entrega",
+          "tipo": "consistência",
+          "acao": "quarentena",
+          "descricao": "status 'em trânsito' com data de entrega (ou 'entregue' sem data): ambíguo, não corrigimos",
+          "afetadas": 6
+        },
+        {
+          "regra": "status_padronizado",
+          "tipo": "consistência",
+          "acao": "corrigir",
+          "descricao": "'ENTREGUE', 'entregue ' e 'em transito' padronizados para entregue/em_transito",
+          "afetadas": 13
+        },
+        {
+          "regra": "prazo_previsto_diverge_do_fornecedor",
+          "tipo": "consistência",
+          "acao": "alerta",
+          "descricao": "previsto_para − solicitado_em diferente do prazo combinado do fornecedor",
+          "afetadas": 0
+        }
+      ]
+    }
+  }
+}

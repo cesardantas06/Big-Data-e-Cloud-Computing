@@ -1,0 +1,31 @@
+
+-- Contagens por camada (Etapa 10.1). Rode ANTES e DEPOIS do lote:
+--   python -m pipeline.consulta sql/contagens.sql > docs/contagens_antes_do_lote.txt
+-- Contagens por camada
+┌─────────────────────────────────────────┬────────┐
+│                  item                   │ linhas │
+│                 varchar                 │ int64  │
+├─────────────────────────────────────────┼────────┤
+│ bronze_api_pedidos (todas as versões)   │   7691 │
+│ bronze_csv_inventario                   │  34895 │
+│ bronze_events                           │  61212 │
+│ bronze_sqlite_clientes                  │   4163 │
+│ bronze_sqlite_itens_venda               │  50350 │
+│ bronze_sqlite_produtos                  │     73 │
+│ bronze_sqlite_vendas                    │  36357 │
+│ gold_dim_produto                        │     73 │
+│ gold_fato_estoque_lote                  │  34549 │
+│ gold_fato_reposicao                     │   7624 │
+│ gold_fato_venda_item                    │  50305 │
+│ gold_pedidos_em_transito                │    203 │
+│ gold_pedidos_entregues                  │   7421 │
+│ quarentena_total                        │   1216 │
+│ silver_eventos                          │  60455 │
+│ silver_inventario                       │  34549 │
+│ silver_itens_venda                      │  50305 │
+│ silver_pedidos_reposicao (1 por pedido) │   7624 │
+│ silver_produtos                         │     73 │
+│ silver_vendas                           │  36357 │
+└─────────────────────────────────────────┴────────┘
+  20 rows                                2 columns
+

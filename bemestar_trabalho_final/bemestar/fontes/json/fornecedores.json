@@ -1,0 +1,73 @@
+[
+  {
+    "fornecedor_id": 1,
+    "nome": "Distribuidora Atlântica",
+    "cnpj": "41.922.850/0001-12",
+    "prazo_entrega_dias": 4,
+    "pedido_minimo_reais": 800,
+    "contato_email": "comercial@distribuidora.com.br"
+  },
+  {
+    "fornecedor_id": 2,
+    "nome": "MedSul Logística",
+    "cnpj": "98.748.230/0001-55",
+    "prazo_entrega_dias": "2 dias",
+    "pedido_minimo_reais": 1000,
+    "contato_email": "comercial@medsul.com.br"
+  },
+  {
+    "fornecedor_id": 3,
+    "nome": "Farma Rio Distribuição",
+    "cnpj": "31.376.666/0001-27",
+    "prazo_entrega_dias": 2,
+    "pedido_minimo_reais": 500,
+    "contato_email": "comercial@farma.com.br"
+  },
+  {
+    "fornecedor_id": 4,
+    "nome": "Panvel Atacado",
+    "prazo_entrega_dias": 2,
+    "pedido_minimo_reais": 800,
+    "contato_email": "comercial@panvel.com.br"
+  },
+  {
+    "fornecedor_id": 5,
+    "nome": "Profarma Leste",
+    "cnpj": "83.754.341/0001-31",
+    "prazo_entrega_dias": 2,
+    "pedido_minimo_reais": 1000,
+    "contato_email": "comercial@profarma.com.br"
+  },
+  {
+    "fornecedor_id": 6,
+    "nome": "DPSP Distribuição",
+    "cnpj": "10.209.431/0001-27",
+    "prazo_entrega_dias": 3,
+    "pedido_minimo_reais": -800,
+    "contato_email": "comercial@dpsp.com.br"
+  },
+  {
+    "fornecedor_id": 7,
+    "nome": "Santa Cruz Fluminense",
+    "cnpj": "34.768.799/0001-13",
+    "prazo_entrega_dias": 7,
+    "pedido_minimo_reais": 300,
+    "contato_email": "comercial@santa.com.br"
+  },
+  {
+    "fornecedor_id": 8,
+    "nome": "Nova Saúde Atacadista",
+    "cnpj": "43.648.831/0001-13",
+    "prazo_entrega_dias": 2,
+    "pedido_minimo_reais": 800,
+    "contato_email": "comercial@nova.com.br"
+  },
+  {
+    "fornecedor_id": 7,
+    "nome": "Santa Cruz Fluminense",
+    "cnpj": "34.768.799/0001-13",
+    "prazo_entrega_dias": 9,
+    "pedido_minimo_reais": 300,
+    "contato_email": "comercial@santa.com.br"
+  }
+]
