@@ -116,7 +116,8 @@ with DAG(
 
     with TaskGroup("transformacao"):
         bronze = BashOperator(task_id="bronze", bash_command=py("pipeline.transform.bronze"))
-        silver = BashOperator(task_id="silver", bash_command=py("pipeline.transform.silver"))
+        silver = BashOperator(task_id="silver", bash_command=py("pipeline.transform.silver"),
+                               env={**BASE_ENV, "PSEUDO_CHAVE": "{{ var.value.pseudo_secret }}"})
         gate = BashOperator(task_id="gate_qualidade",
                             bash_command=py("pipeline.transform.gate",
                                             "--max-quarentena-pct {{ params.max_quarentena_pct }}"))
